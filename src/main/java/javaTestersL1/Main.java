@@ -4,7 +4,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class Main {
     public static void main(String[] args) {
-        int obstacleСourse[] = {10, 10, 100, 200, 10, 30, 221, 451, 7850, 80};
+        int obstacleСourse[] = {50, 10, 5, 200, 10, 30, 221, 451, 7850, 80};
         Human[] humanArray = new Human[5];
         Cat[] catArray = new Cat[5];
         Robot[] robotArray = new Robot[5];
