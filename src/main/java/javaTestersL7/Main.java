@@ -1,17 +1,93 @@
 package javaTestersL7;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 
 public class Main {
+    public static final String HOST = "dataservice.accuweather.com";
+    public static final String FORECAST_URL = "forecasts";
+    public static final String DAILY_URL = "daily";
+    public static final String ONE_DAY_URL = "1day";
+    public static final String LOCATIONS = "locations";
+    public static final String API_V = "v1";
+    public static final String CITY_ID = "2-242405_1_AL";
+    public static final String API_KEY = "TpzDN4DaUsgaVRgUrDmK6ho2Gbj7Kw5L";
+
 
     public static void main(String[] args) throws IOException {
-
+        OkHttpClient client = new OkHttpClient();
         ObjectMapper objectMapper = new ObjectMapper();
-        String test = "{\"Version\":1,\"Key\":\"2-242405_1_AL\",\"Type\":\"City\",\"Rank\":30,\"LocalizedName\":\"Chisinau\",\"EnglishName\":\"Chișinău\",\"PrimaryPostalCode\":\"\",\"Region\":{\"ID\":\"EUR\",\"LocalizedName\":\"Europe\",\"EnglishName\":\"Europe\"},\"Country\":{\"ID\":\"MD\",\"LocalizedName\":\"Moldova\",\"EnglishName\":\"Moldova\"},\"AdministrativeArea\":{\"ID\":\"CU\",\"LocalizedName\":\"Chișinău\",\"EnglishName\":\"Chișinău\",\"Level\":1,\"LocalizedType\":\"City\",\"EnglishType\":\"City\",\"CountryID\":\"MD\"},\"TimeZone\":{\"Code\":\"EEST\",\"Name\":\"Europe/Chisinau\",\"GmtOffset\":3.0,\"IsDaylightSaving\":true,\"NextOffsetChange\":\"2021-10-31T00:00:00Z\"},\"GeoPosition\":{\"Latitude\":47.027,\"Longitude\":28.842,\"Elevation\":{\"Metric\":{\"Value\":36.0,\"Unit\":\"m\",\"UnitType\":5},\"Imperial\":{\"Value\":118.0,\"Unit\":\"ft\",\"UnitType\":0}}},\"IsAlias\":true,\"ParentCity\":{\"Key\":\"242405\",\"LocalizedName\":\"Chișinău\",\"EnglishName\":\"Chișinău\"},\"SupplementalAdminAreas\":[],\"DataSets\":[\"AirQualityCurrentConditions\",\"AirQualityForecasts\",\"Alerts\",\"ForecastConfidence\",\"FutureRadar\",\"MinuteCast\",\"Radar\"]}";
-        WeatherResponse weather = objectMapper.readValue(test, WeatherResponse.class);
-        System.out.println(weather.toString());
+        HttpUrl cityUrl = new HttpUrl.Builder()
+                .scheme("http")
+                .host(HOST)
+                .addPathSegment(LOCATIONS)
+                .addPathSegment(API_V)
+                .addPathSegment(CITY_ID)
+                .addQueryParameter("apikey", API_KEY)
+                .build();
+
+        HttpUrl oneDayUrl = new HttpUrl.Builder()
+                .scheme("http")
+                .host(HOST)
+                .addPathSegment(FORECAST_URL)
+                .addPathSegment(API_V)
+                .addPathSegment(DAILY_URL)
+                .addPathSegment(ONE_DAY_URL)
+                .addPathSegment(CITY_ID)
+                .addQueryParameter("apikey", API_KEY)
+                .build();
+
+        Request requestCity = new Request.Builder()
+                .url(cityUrl)
+                .build();
+
+        Request requestOneDayWeather = new Request.Builder()
+                .url(oneDayUrl)
+                .build();
+
+        Response responseCity = client.newCall(requestCity).execute();
+        String city = Objects.requireNonNull(responseCity.body()).string();
+        System.out.println(city);
+
+
+        CityResponse cN = objectMapper.readValue(city, CityResponse.class);
+        String cityName = cN.toString();
+
+        Response responseWeather = client.newCall(requestOneDayWeather).execute();
+        String weather = Objects.requireNonNull(responseWeather.body()).string();
+        System.out.println(weather);
+        JsonNode day = objectMapper
+                .readTree(weather)
+                .at("/HeadLine/EffectiveDate");
+        String selectedDay = day.asText();
+
+        JsonNode text = objectMapper
+                .readTree(weather)
+                .at("/HeadLine/Text");
+        String weatherText = text.asText();
+
+        JsonNode minimumTemperature = objectMapper
+                .readTree(weather)
+                .at("/DailyForecasts/Temperature/Minimum/Value");
+        String minTemp = minimumTemperature.asText();
+
+        JsonNode maximumTemperature = objectMapper
+                .readTree(weather)
+                .at("/DailyForecasts/Temperature/Maximum/Value");
+        String maxTemp = maximumTemperature.asText();
+
+        System.out.println("В городе " + cityName + " " + selectedDay + " будет " + weatherText + " а температура от " + minTemp + " до " + maxTemp);
+
 
     }
 
