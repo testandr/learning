@@ -17,7 +17,7 @@ public class Main {
     public static final String HOST = "dataservice.accuweather.com";
     public static final String FORECAST_URL = "forecasts";
     public static final String DAILY_URL = "daily";
-    public static final String ONE_DAY_URL = "1day";
+    public static final String FIVE_DAYS_URL = "5day";
     public static final String LOCATIONS = "locations";
     public static final String API_V = "v1";
     public static final String CITY_ID = "2-242405_1_AL";
@@ -42,7 +42,7 @@ public class Main {
                 .addPathSegment(FORECAST_URL)
                 .addPathSegment(API_V)
                 .addPathSegment(DAILY_URL)
-                .addPathSegment(ONE_DAY_URL)
+                .addPathSegment(FIVE_DAYS_URL)
                 .addPathSegment(CITY_ID)
                 .addQueryParameter("apikey", API_KEY)
                 .build();
@@ -55,39 +55,21 @@ public class Main {
                 .url(oneDayUrl)
                 .build();
 
+
         Response responseCity = client.newCall(requestCity).execute();
-        String city = Objects.requireNonNull(responseCity.body()).string();
-        System.out.println(city);
+        CityResponse cr = objectMapper.readValue(Objects.requireNonNull(responseCity.body()).byteStream(), CityResponse.class);
 
-
-        CityResponse cN = objectMapper.readValue(city, CityResponse.class);
-        String cityName = cN.toString();
 
         Response responseWeather = client.newCall(requestOneDayWeather).execute();
-        String weather = Objects.requireNonNull(responseWeather.body()).string();
-        System.out.println(weather);
-        JsonNode day = objectMapper
-                .readTree(weather)
-                .at("/HeadLine/EffectiveDate");
-        String selectedDay = day.asText();
+        WeatherResponse wr = objectMapper.readValue(Objects.requireNonNull(responseWeather.body()).byteStream(), WeatherResponse.class);
 
-        JsonNode text = objectMapper
-                .readTree(weather)
-                .at("/HeadLine/Text");
-        String weatherText = text.asText();
-
-        JsonNode minimumTemperature = objectMapper
-                .readTree(weather)
-                .at("/DailyForecasts/Temperature/Minimum/Value");
-        String minTemp = minimumTemperature.asText();
-
-        JsonNode maximumTemperature = objectMapper
-                .readTree(weather)
-                .at("/DailyForecasts/Temperature/Maximum/Value");
-        String maxTemp = maximumTemperature.asText();
-
-        System.out.println("В городе " + cityName + " " + selectedDay + " будет " + weatherText + " а температура от " + minTemp + " до " + maxTemp);
-
+        for (DailyForecast forecast : wr.getDailyForecasts()){
+            System.out.print(
+                    "Погода в " + cr.getAdministrativeArea().getLocalizedName() + " на " + forecast.getDate() + "\n" +
+                            " будет " +forecast.getDay().getIconPhase() + "\n"+
+                            " температура от " + forecast.getTemperature().getMinimum().getValue() + forecast.getTemperature().getMinimum().getUnit() + " до " + forecast.getTemperature().getMaximum().getValue() + forecast.getTemperature().getMinimum().getUnit() + "\n"
+            );
+        }
 
     }
 

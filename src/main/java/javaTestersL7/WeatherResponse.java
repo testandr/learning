@@ -1,62 +1,36 @@
 package javaTestersL7;
 
-
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WeatherResponse {
-    private String EffectiveDate;
-    private String Text;
-    private String Unit;
 
+    @JsonProperty("DailyForecasts")
+    private List<DailyForecast> dailyForecasts;
 
-    public WeatherResponse() {
-
+    public WeatherResponse(){
     }
 
-    @JsonCreator
-    public WeatherResponse(@JsonProperty("EffectiveDate") String effectiveDate,
-                           @JsonProperty("Text") String text,
-                           @JsonProperty("Unit") String unit) {
-        this.EffectiveDate = effectiveDate;
-        this.Text = text;
-        this.Unit = unit;
+    public WeatherResponse(List<DailyForecast> dailyForecasts){
+        this.dailyForecasts = dailyForecasts;
     }
 
-    public String getEffectiveDate() {
-        return EffectiveDate;
+    public List<DailyForecast> getDailyForecasts() {
+        return dailyForecasts;
     }
 
-    public void setEffectiveDate(String effectiveDate) {
-        this.EffectiveDate = effectiveDate;
-    }
-
-    public String getText() {
-        return Text;
-    }
-
-    public void setText(String text) {
-        this.Text = text;
-    }
-
-
-    public String getUnit() {
-        return Unit;
-    }
-
-    public void setUnit(String unit) {
-        this.Unit = unit;
+    public void setDailyForecasts(List<DailyForecast> dailyForecasts) {
+        this.dailyForecasts = dailyForecasts;
     }
 
     @Override
     public String toString() {
         return "WeatherResponse{" +
-                "EffectiveDate='" + EffectiveDate + '\'' +
-                ", Text='" + Text + '\'' +
-                ", Unit='" + Unit + '\'' +
+                "dailyForecasts=" + dailyForecasts +
                 '}';
     }
 }

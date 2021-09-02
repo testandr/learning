@@ -3,27 +3,32 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CityResponse {
-    private String LocalizedName;
+
+    @JsonProperty("AdministrativeArea")
+    private AdministrativeArea administrativeArea;
 
     public CityResponse(){}
 
-    @JsonCreator
-    public CityResponse(@JsonProperty("LocalizedName") String localizedName) {
-        this.LocalizedName = localizedName;
+    public CityResponse(AdministrativeArea administrativeArea) {
+        this.administrativeArea = administrativeArea;
     }
 
-    public String getLocalizedName() {
-        return LocalizedName;
+    public AdministrativeArea getAdministrativeArea() {
+        return administrativeArea;
     }
 
-    public void setLocalizedName(String localizedName) {
-        this.LocalizedName = localizedName;
+    public void setAdministrativeArea(AdministrativeArea administrativeArea) {
+        this.administrativeArea = administrativeArea;
     }
 
     @Override
     public String toString() {
-        return LocalizedName;
+        return "CityResponse{" +
+                "administrativeArea=" + administrativeArea +
+                '}';
     }
 }
