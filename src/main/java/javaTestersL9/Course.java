@@ -1,4 +1,4 @@
 package javaTestersL9;
 
-public class Main {
+public interface Course {
 }
